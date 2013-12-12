@@ -1,0 +1,24 @@
+<?php 
+    require_once("config.php");
+    
+    $body = $_GET["body"];
+    $callback = $_GET["callback"];
+    
+    session_start();
+    $user_id = $_SESSION["user_id"];
+    $user_key = $_SESSION["user_key"];
+    
+    
+    // 인증이 확실한지 확인
+    $authKey = "12345678" . md5("12345678" . $user_key);
+    if ( $_GET['flag'] == 'insert' ) {
+    	$result = file_get_contents("http://me2day.net/api/create_post/{$user_id}.json?uid={$user_id}&ukey={$authKey}&akey=" . A_KEY . "&post[body]={$body}");
+    } else if ( $_GET['flag'] == 'delete' ) {
+    	$result = file_get_contents("http://me2day.net/api/delete_post.xml?uid={$user_id}&ukey={$authKey}&akey=" . A_KEY . "&post_id=pyqti9p-6jjkv");
+    }
+    
+    //var_dump($result);
+    header("Content-type: application/json");
+    echo "{$callback}({'result':'{$result}'})";
+    
+?>

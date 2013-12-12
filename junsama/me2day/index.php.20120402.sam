@@ -1,0 +1,16 @@
+<?php
+    require_once("config.php");
+    $result = json_decode(file_get_contents("http://me2day.net/api/get_auth_url.json?akey=" . A_KEY));
+    print_r($result);
+?>
+<!doctype html>
+<html>
+    <head>
+        <meta charset="EUC-KR">
+        <title>미투데이 인증 후 글쓰기</title>
+      </head>
+    <body>
+        <br />
+        <a href="<?=$result->url?>">미투데이 인증하기</a>
+      </body>
+</html>

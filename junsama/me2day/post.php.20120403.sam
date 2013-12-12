@@ -1,0 +1,64 @@
+<?php 
+    require_once("config.php");
+    
+	function jsonDecode ($json) { 
+		$json = str_replace(array("\\\\", "\\\""), array("&#92;", "&#34;"), $json);
+		$parts = preg_split("@(\"[^\"]*\")|([\[\]\{\},:])|\s@is", $json, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+		
+		foreach ($parts as $index => $part) { 
+			if (strlen($part) == 1) { 
+				switch ($part) { 
+					case "[":
+					case "{":
+					$parts[$index] = "array(";
+					break;
+					case "]":
+					case "}":
+					$parts[$index] = ")";
+					break;
+						case ":":
+						$parts[$index] = "=>";
+					break;
+						case ",":
+					break;
+					default:
+						//return null;
+				}
+			}
+			else {
+				if ((substr($part, 0, 1) != "\"") || (substr($part, -1, 1) != "\"")) {
+					//return null;
+				}
+			}
+		}
+		
+		$json = str_replace(array("&#92;", "&#34;", "$"), array("\\\\", "\\\"", "\\$"), implode("", $parts));
+		return eval("return $json;"); 
+}
+
+    $body = urlencode($_GET["body"]);
+	//$body = iconv('utf8','EUC-KR', $_GET["body"]);
+    $callback = $_GET["callback"];
+    
+    session_start();
+    $user_id = $_SESSION["user_id"];
+    $user_key = $_SESSION["user_key"];
+    
+    // 인증이 확실한지 확인
+
+    $authKey = "12345678" . md5("12345678" . $user_key);
+
+    if ( $_GET['flag'] == 'insert' ) {
+    	$result = file_get_contents("http://me2day.net/api/create_post/{$user_id}.json?uid={$user_id}&ukey={$authKey}&akey=" . A_KEY . "&post[body]={$body}");
+		header("Content-type: application/json");
+	    echo "{$callback}({'result':'{$result}'})";
+    } else if ( $_GET['flag'] == 'delete' ) {
+    	$result = file_get_contents("http://me2day.net/api/delete_post.xml?uid={$user_id}&ukey={$authKey}&akey=" . A_KEY . "&post_id=py2swrw-6jjkv");
+    }
+/*
+내용 : body == textBody
+이미지 : icon
+userid : author->id, author->nickname
+글id : post_id
+*/
+?>
